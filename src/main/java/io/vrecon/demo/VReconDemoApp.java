@@ -78,6 +78,10 @@ public class VReconDemoApp {
             .required()
             .desc("Request UUID to check status")
             .build());
+        options.addOption(Option.builder("j")
+            .longOpt("json")
+            .desc("Output raw JSON response")
+            .build());
 
         try {
             CommandLine cmd = new DefaultParser().parse(options, args);
@@ -85,10 +89,11 @@ public class VReconDemoApp {
             String apiKey = cmd.getOptionValue("key");
             String requestUuid = cmd.getOptionValue("uuid");
             boolean verbose = cmd.hasOption("verbose");
+            boolean json = cmd.hasOption("json");
 
             VReconCommands commands = new VReconCommands(baseUrl, apiKey, verbose);
             try {
-                commands.getState(requestUuid);
+                commands.getState(requestUuid, json);
             } finally {
                 commands.close();
             }

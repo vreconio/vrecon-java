@@ -55,12 +55,22 @@ public class VReconApiClient {
         RecognizeRequest request = new RecognizeRequest(apiKey, base64Image, format);
         String jsonBody = objectMapper.writeValueAsString(request);
 
-        HttpPost httpPost = new HttpPost(baseUrl + "/api/securapi/recognize");
+        String url = baseUrl + "/api/securapi/recognize";
+        if (verbose) {
+            System.out.println("[LOG] POST /api/securapi/recognize - Request URL: " + url);
+            System.out.println("[LOG] POST /api/securapi/recognize - Request Body: {\"key\":\"***\",\"image\":\"<base64 " + imageBytes.length + " bytes>\",\"format\":\"" + format + "\"}");
+        }
+
+        HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Content-Type", "application/json");
         httpPost.setEntity(new StringEntity(jsonBody, ContentType.APPLICATION_JSON));
 
         return httpClient.execute(httpPost, response -> {
             String responseBody = EntityUtils.toString(response.getEntity());
+            if (verbose) {
+                System.out.println("[LOG] POST /api/securapi/recognize - Response Status: " + response.getCode());
+                System.out.println("[LOG] POST /api/securapi/recognize - Response Body: " + responseBody);
+            }
             return objectMapper.readValue(responseBody, RecognizeResponse.class);
         });
     }
@@ -73,6 +83,18 @@ public class VReconApiClient {
      * @throws IOException if the request fails
      */
     public StateResponse getState(String requestUuid) throws IOException {
+        String jsonResponse = getStateAsJson(requestUuid);
+        return parseStateResponse(jsonResponse);
+    }
+
+    /**
+     * Get the state/status of a recognition request as raw JSON.
+     *
+     * @param requestUuid The UUID returned from the recognize endpoint
+     * @return Raw JSON response string
+     * @throws IOException if the request fails
+     */
+    public String getStateAsJson(String requestUuid) throws IOException {
         StateRequest request = new StateRequest(apiKey, requestUuid);
         String jsonBody = objectMapper.writeValueAsString(request);
 
@@ -92,8 +114,19 @@ public class VReconApiClient {
                 System.out.println("[LOG] POST /api/securapi/state - Response Status: " + response.getCode());
                 System.out.println("[LOG] POST /api/securapi/state - Response Body: " + responseBody);
             }
-            return objectMapper.readValue(responseBody, StateResponse.class);
+            return responseBody;
         });
+    }
+
+    /**
+     * Parse a JSON response string into a StateResponse object.
+     *
+     * @param jsonResponse The JSON response string
+     * @return StateResponse parsed from the JSON
+     * @throws IOException if parsing fails
+     */
+    public StateResponse parseStateResponse(String jsonResponse) throws IOException {
+        return objectMapper.readValue(jsonResponse, StateResponse.class);
     }
 
     /**

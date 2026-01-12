@@ -49,13 +49,23 @@ public class VReconCommands {
      * Execute the state command - get the status of a recognition request.
      *
      * @param requestUuid The UUID of the recognition request
+     * @param outputJson If true, output raw JSON response instead of formatted output
      */
-    public void getState(String requestUuid) {
-        System.out.println("Checking recognition state for UUID: " + requestUuid);
-        System.out.println();
+    public void getState(String requestUuid, boolean outputJson) {
+        if (!outputJson) {
+            System.out.println("Checking recognition state for UUID: " + requestUuid);
+            System.out.println();
+        }
 
         try {
-            StateResponse response = client.getState(requestUuid);
+            String jsonResponse = client.getStateAsJson(requestUuid);
+
+            if (outputJson) {
+                System.out.println(jsonResponse);
+                return;
+            }
+
+            StateResponse response = client.parseStateResponse(jsonResponse);
 
             if (response.isSuccess()) {
                 System.out.println("Request UUID: " + response.getRequestUuid());

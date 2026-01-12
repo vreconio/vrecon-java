@@ -9,7 +9,9 @@
       "Bash(mvn dependency:tree:*)",
       "Bash(jar tf:*)",
       "Bash(ls:*)",
-      "Bash(md5:*)"
+      "Bash(md5:*)",
+      "Bash(./build.sh:*)",
+      "Bash(git add:*)"
     ]
   }
 }
